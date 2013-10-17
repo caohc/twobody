@@ -1,4 +1,6 @@
-stand procedure on lxplus:
+### Only dimuon works currently.
+
+Standard procedure on **_lxplus_**:
 <pre>
 cd CMSSW_X_X_X/src/; cmsenv
 svn co svn+ssh://[your_cern_login]@svn.cern.ch/reps/exost
@@ -12,10 +14,14 @@ exost -a workspace -c dimuon_ratio.cfg
 cp myWS.root ws_dimuon_ratio.cfg
 root rootlogon.C
 </pre>
+
+Inside **_ROOT_**:
 <pre>
 root [0] .L dimuon.C+
 root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
 </pre>
+
+Explatation of **_limit()_** function
 <pre>
 /*=======================================================================================
          limit( std::string channel, // dimuon, dielectron, mumuee, etc
