@@ -13,9 +13,8 @@ stand procedure on lxplus:
 11. root [0] .L dimuon.C+
 12. root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
 /*=======================================================================================
-
-    limit( std::string channel, // dimuon, dielectron, mumuee, etc
-		std::string mode,    // observed, expected, mass limit (extra k-factor uncertainty)
+limit( std::string channel, // dimuon, dielectron, mumuee, etc
+       std::string mode,    // observed, expected, mass limit (extra k-factor uncertainty)
 		Float_t peak,        // resonance mass
 		std::string suffix,  // suffix for output file names
 		Int_t ntoys,         // number of pseudoexperiments for expected limit
