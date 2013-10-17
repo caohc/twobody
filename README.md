@@ -7,11 +7,12 @@ stand procedure on lxplus:
 5. cd workdir
 6. git clone git@github.com:zhang8473/twobody.git
 7. cd twobody
-8. exost -a workspace -c dimuon_ratio.cfg 
-9. cp myWS.root ws_dimuon_ratio.cfg
-10. root rootlogon.C
-11. root [0] .L dimuon.C+
-12. root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
+8. PWDTMP=${PWD//\//\\\/};sed -i "s/,.*dimuon_20637invpb.root/, ${PWDTMP}\/dimuon_20637invpb.root/g" dimuon_ratio.cfg
+9. exost -a workspace -c dimuon_ratio.cfg 
+10. cp myWS.root ws_dimuon_ratio.cfg
+11. root rootlogon.C
+12. root [0] .L dimuon.C+
+13. root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
 <pre>
 /*=======================================================================================
          limit( std::string channel, // dimuon, dielectron, mumuee, etc
