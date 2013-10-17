@@ -76,7 +76,7 @@ while _peak < mass_max:
             "source exost/setup/cmssw_setup.sh\n"+\
             "cd "+_dir+"\n"+\
             "cd "+TMPDIR+"\n"
-        SHFILE+='root -l -b -q -n rootlogon.C run_limit.C\\(' + \
+        SHFILE+='root -l -b -q -n run_limit.C\\(' + \
             '\\"'+channel+'\\",' + \
             '\\"'+mode+'\\",' + \
             str(_peak)+',' + \
