@@ -15,14 +15,14 @@ stand procedure on lxplus:
 <pre>
 /*=======================================================================================
          limit( std::string channel, // dimuon, dielectron, mumuee, etc
-                std::string mode,    // observed, expected, mass limit (extra k-factor uncertainty)
-		Float_t peak,        // resonance mass
-		std::string suffix,  // suffix for output file names
-		Int_t ntoys,         // number of pseudoexperiments for expected limit
-		Int_t mcmc_iter,     // number of MCMC iterations
-		Int_t mcmc_burnin,   // number of MCMC burn in steps to be discarded
-		std::string inputdir,// directory with workspace files
-		std::string plot_name // not using
-    )<BR>
+                std::string mode,    // observed, expected, mass limit (extra k-factor uncertainty) 
+                Float_t peak,        // resonance mass
+                std::string suffix,  // suffix for output file names
+                Int_t ntoys,         // number of pseudoexperiments for expected limit
+                Int_t mcmc_iter,     // number of MCMC iterations
+                Int_t mcmc_burnin,   // number of MCMC burn in steps to be discarded
+                std::string inputdir,// directory with workspace files
+                std::string plot_name // not using
+              )
 =========================================================================================*/
 </pre>
