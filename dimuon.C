@@ -774,13 +774,13 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       CreateDimuonToyMc();
       if (!pe_counter) data=SetObservableRange(peak);
     }
-    else if (!pe_counter) { //  "regular" observed limit
+    else { //  "regular" observed limit
       
       std::cout << _legend << std::endl;
       std::cout << _legend << "calculating an observed limit..." << std::endl;
       std::cout << _legend << "I will do it " << ntoys << " times, so one can average. " << pe_counter+1 << " of " << ntoys << std::endl;
       std::cout << _legend << std::endl;
-      data=SetObservableRange(peak);
+      if (!pe_counter) data=SetObservableRange(peak);
       //ntoys = 1;
     }
 
