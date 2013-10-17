@@ -1,6 +1,6 @@
 stand procedure on lxplus:
 
-1. cd CMSSW_X_X_X/src/
+1. cd CMSSW_X_X_X/src/; cmsenv
 2. git clone git@github.com:zhang8473/exost.git
 3. cd exost
 4. source setup/cmssw_setup.[c]sh
