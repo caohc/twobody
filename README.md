@@ -1,18 +1,21 @@
 stand procedure on lxplus:
-
-1. cd CMSSW_X_X_X/src/; cmsenv
-2. svn co svn+ssh://[your_cern_login]@svn.cern.ch/reps/exost
-3. cd exost
-4. source setup/cmssw_setup.[c]sh
-5. cd workdir
-6. git clone git@github.com:zhang8473/twobody.git
-7. cd twobody
-8. PWDTMP=${PWD//\//\\\/};sed -i "s/,.*dimuon_20637invpb.root/, ${PWDTMP}\/dimuon_20637invpb.root/g" dimuon_ratio.cfg
-9. exost -a workspace -c dimuon_ratio.cfg 
-10. cp myWS.root ws_dimuon_ratio.cfg
-11. root rootlogon.C
-12. root [0] .L dimuon.C+
-13. root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
+<pre>
+cd CMSSW_X_X_X/src/; cmsenv
+svn co svn+ssh://[your_cern_login]@svn.cern.ch/reps/exost
+cd exost
+source setup/cmssw_setup.[c]sh
+cd workdir
+git clone git@github.com:zhang8473/twobody.git
+cd twobody
+PWDTMP=${PWD//\//\\\/};sed -i "s/,.*dimuon_20637invpb.root/, ${PWDTMP}\/dimuon_20637invpb.root/g" dimuon_ratio.cfg
+exost -a workspace -c dimuon_ratio.cfg 
+cp myWS.root ws_dimuon_ratio.cfg
+root rootlogon.C
+</pre>
+<pre>
+root [0] .L dimuon.C+
+root [1] limit("dimuon","expected",300.0,"m300.0_test",1,10000,500,"","")
+</pre>
 <pre>
 /*=======================================================================================
          limit( std::string channel, // dimuon, dielectron, mumuee, etc
