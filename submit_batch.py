@@ -54,7 +54,7 @@ os.system("exost -a workspace -c dimuon_ratio.cfg")
 os.system('mv myWS.root ws_dimuon_ratio.root')
 os.system('ls -lh ws_dimuon_ratio.root;date')
 print "=========ws_dimuon_ratio.root should be updated====="
-os.system('root -l -b -q -n dimuon.C++')
+os.system('root -l -b -q -n rootlogon.C dimuon.C++')
 _dir=os.getcwd()
 
 _nsubmit_per_mass_point = int((exp_ntoys_per_mass_point+1)/exp_ntoys_per_job)
