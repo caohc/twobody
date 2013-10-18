@@ -35,14 +35,14 @@ mode = 'observed'
 #mode = 'mass_cteq'
 #mode = 'mass_graviton'
 
-mass_min  =    1500.0
+mass_min  =    250.0
 mass_max  =    1500.1
 mass_inc  =     25.0
 n_iter    =    10000
 n_burn_in =      500
 
-exp_ntoys_per_job = 10           # these params are now used for observed as well
-exp_ntoys_per_mass_point = 10
+exp_ntoys_per_job = 100           # these params are now used for observed as well
+exp_ntoys_per_mass_point = 2000
 
 #
 #------------------------------------------------------------------------
@@ -94,10 +94,10 @@ while _peak < mass_max:
         os.system("chmod +x "+SHNAME)
         if not simulate:
             if JID==0 and _peak == mass_min:
-#                os.system("bsub -q 2nd "+SHNAME)
+                os.system("bsub -q 2nd "+SHNAME)
                 print SHNAME," has output (LSFxxxxxx)"
-                os.system("./"+SHNAME)
+#                os.system("./"+SHNAME)
             else:
-#                os.system("bsub -o /dev/null -e /dev/null -q 2nd "+SHNAME)#Here I turned off the email notification coming from LSF
-	         os.system("./"+SHNAME)
+                os.system("bsub -o /dev/null -e /dev/null -q 2nd "+SHNAME)#Here I turned off the email notification coming from LSF
+#	         os.system("./"+SHNAME)
     _peak += mass_inc
