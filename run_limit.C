@@ -8,7 +8,8 @@ void run_limit( std::string channel, // dimuon, dielectron etc
 		std::string inputdir,
 		std::string plot_name )
 {
-  gSystem->SetIncludePath( "-Itardir/");
+  //gSystem->SetIncludePath( "-Itardir/");
+  gSystem -> SetIncludePath( "-I$ROOT_INCLUDE -I$ROOFIT_INCLUDE");
   gSystem->Load("dimuon_C.so");
   limit( channel, // dimuon, dielectron etc
 	 mode,    // obsereved, expected, mass limit (extra k-factor uncertainty)

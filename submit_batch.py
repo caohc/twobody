@@ -30,19 +30,19 @@ cfg_file="dimuon_ratio.cfg"
 #channel = 'dilepton'
 channel = 'dimuon'
 #channel = 'dielectron'
-#mode = 'observed'
 mode = 'observed'
+#mode = 'expected'
 #mode = 'mass_cteq'
 #mode = 'mass_graviton'
 
-mass_min  =    300.0
+mass_min  =    250.0
 mass_max  =    1500.1
 mass_inc  =     25.0
 n_iter    =    10000
 n_burn_in =      500
 
-exp_ntoys_per_job = 10           # these params are now used for observed as well
-exp_ntoys_per_mass_point = 10
+exp_ntoys_per_job = 100           # these params are now used for observed as well
+exp_ntoys_per_mass_point = 2000
 
 #
 #------------------------------------------------------------------------
@@ -71,14 +71,16 @@ while _peak < mass_max:
             continue
         os.system('cp run_limit.C '+TMPDIR+';cp dimuon_C.so '+TMPDIR+';cp ws_dimuon_ratio.root '+TMPDIR )
         SHFILE="#!/bin/bash\n"+          \
+            "cd "+_dir+"/../../../\n"+\
+            "eval `scramv1 runtime -sh`\n"+\
+            "source exost/setup/cmssw_setup.sh\n"+\
             "cd "+_dir+"\n"+\
-            "source ../../setup/lxplus_standalone_setup.sh\n"+\
             "cd "+TMPDIR+"\n"
         SHFILE+='root -l -b -q -n run_limit.C\\(' + \
             '\\"'+channel+'\\",' + \
             '\\"'+mode+'\\",' + \
             str(_peak)+',' + \
-            '\\"'+"m"+str(_peak)+"_"+str(JID)+'\\",' + \
+            '\\"'+"m"+str(_peak)+"_"+str(mode)+"_"+str(JID)+'\\",' + \
             str(exp_ntoys_per_job)+',' + \
             str(n_iter)+',' + \
             str(n_burn_in)+',' + \
@@ -92,10 +94,10 @@ while _peak < mass_max:
         os.system("chmod +x "+SHNAME)
         if not simulate:
             if JID==0 and _peak == mass_min:
-                #os.system("bsub "+SHNAME)
-                os.system("./"+SHNAME)
+                os.system("bsub -q 2nd "+SHNAME)
                 print SHNAME," has output (LSFxxxxxx)"
+#                os.system("./"+SHNAME)
             else:
-                os.system("./"+SHNAME)
-                #os.system("bsub -o /dev/null -e /dev/null -q 8nh "+SHNAME)#Here I turned off the email notification coming from LSF
+                os.system("bsub -o /dev/null -e /dev/null -q 2nd "+SHNAME)#Here I turned off the email notification coming from LSF
+#	         os.system("./"+SHNAME)
     _peak += mass_inc
