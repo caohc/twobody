@@ -94,12 +94,12 @@ private:
   Int_t CreateDimuonToyMc();
   Double_t GetRandom( std::string pdf, std::string var );
   Int_t FixVariables( std::set<std::string> par );
-  Double_t GetPoiUpperSimple(std::string channel, Double_t peak, ModelConfig &_mc);
+  Double_t GetPoiUpperSimple(std::string channel, Double_t peak);
   Double_t GetPoiUpper(std::string channel, Double_t peak, ModelConfig &_mc);
   std::map<std::string, double> GetDataRange( RooAbsData * _data, double peak, int goal );
   RooAbsData * SetObservableRange( double peak );
   std::ofstream logfile;
-  RooAbsData * data;
+  RooAbsData * data, * realdata;
   RooAbsPdf * model;
   RooArgSet * poi;
   RooArgSet * nuis;
@@ -433,7 +433,7 @@ LikelihoodInterval *TwoBody::GetPlrInterval( double conf_level , ModelConfig &_m
   return plc.GetInterval();
 }
 
-double TwoBody::GetPoiUpperSimple(std::string channel, Double_t peak , ModelConfig &_mc){
+double TwoBody::GetPoiUpperSimple(std::string channel, Double_t peak){
   //
   // Estimate a good value for the upper boundary of the range of POI
   // using just data in a window corresponding to the signal region
@@ -462,22 +462,9 @@ double TwoBody::GetPoiUpperSimple(std::string channel, Double_t peak , ModelConf
 
   double c_min = peak - sqrt(_width*_width + _sigma*_sigma);
   double c_max = peak + sqrt(_width*_width + _sigma*_sigma);
-  TH1F h_count("h_count", "h_count", 100, c_min, c_max);
-  //  TH1F h_count("h_count", "h_count", 100, 200, );
 
-  // combined data is already created by now
-  // should use it and not mData because
-  // mData is empty if the input workspace
-  // is used
-  //mData[channel]->fillHistogram(&h_count, *mc->GetObservables());
-
-  std::cout << legend << "projecting single-channel data to a histogram"
-	      << std::endl;
-  data->fillHistogram(&h_count, RooArgList( *(_mc.GetObservables()) ) );
-  //  TCanvas tmp("xx","X",500,500);
-  //  h_count.Draw();
-  //  tmp.SaveAs("aa.pdf");
-  double n_count = h_count.Integral(1,100);
+  sprintf(buf, "mass>=%f && mass<=%f", c_min, c_max);
+  double n_count = data->sumEntries( buf );
 
   // ad-hoc fix when there are no events in window
   if (n_count < 0.3) n_count = 0.3;
@@ -518,7 +505,7 @@ Double_t TwoBody::GetPoiUpper(std::string channel, Double_t peak, ModelConfig &_
   // adding auto-channel option (multi) while
   // preserving backwards compatibility
   // if single channel
-  _range = GetPoiUpperSimple(channel, peak, _mc);
+  _range = GetPoiUpperSimple(channel, peak);
   
   std::cout << legend << "crude estimate for poi range (x3): "
 	    << 3.0*_range << std::endl;
@@ -561,6 +548,13 @@ Double_t TwoBody::GetRandom( std::string pdf, std::string var ){
     RooRealVar * _par = ws->var(var.c_str());
     if (_par!=NULL) {
       RooAbsPdf * _pdf=ws->pdf(pdf.c_str());
+      /*
+	RooPlot* xframe = _par->frame(Title("p.d.f")) ;
+      _pdf->plotOn(xframe);
+      TCanvas* c = new TCanvas("test","rf101_basics",800,400) ;
+      gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+      c->SaveAs("syst_nbkg.pdf");
+      */
       if (_pdf!=NULL) return _pdf->generate(*_par, 1)->get(0)->getRealValue(var.c_str(),0);
       else {
 	std::cerr<<"Cannot find RooPdf:"<<pdf<<std::endl;
@@ -598,6 +592,15 @@ Int_t TwoBody::AddWorkspace(std::string filename,
   delete data; 
   data = new RooDataSet( *(RooDataSet *) _ws->data("data") );
   data->changeObservableName("vertex_m","mass");
+
+  realdata = new RooDataSet( *(RooDataSet *) data );
+  //new RooDataSet( *(RooDataSet *) ws->data("data") );
+  realdata->SetName("RealData");
+  //realdata->changeObservableName("vertex_m","mass");
+
+  ws->import( *data );
+
+  ws->Print();
   //  for (int i=0; i!=100; ++i){
   //  RooRealVar * _var = (RooRealVar *)(data->get(i)->first());
   //  cerr<<_var->getVal()<<",";
@@ -623,9 +626,9 @@ Int_t TwoBody::CreateDimuonToyMc( void ){
   Double_t _nbkg_est = ws->var("nbkg_est_dimuon")->getVal();
   //Double_t _ntoy = pow(_kappa,_beta) * _nbkg_est;
   Double_t _ntoy = _beta * _nbkg_est;
-
+ 
   Int_t _n = r.Poisson(_ntoy);
-
+  _n=Int_t(_nbkg_est);
   // all nuisance parameters:
   //   beta_nsig_dimuon, 
   //   beta_nbkg_dimuon,
@@ -642,15 +645,20 @@ Int_t TwoBody::CreateDimuonToyMc( void ){
 						     NumEvents(_n),
 						     Extended(kFALSE),
 						     Verbose(kTRUE));
-  //RooDataSet * _data = _pdf->generate(*_spec);
+
+  //RooPlot* xframe = _mass->frame(Title("Gaussian p.d.f.")) ;
+  //realdata->plotOn(xframe,LineColor(kRed),MarkerColor(kRed));
 
   delete data;
   data = _pdf->generate(*_spec); // class member
   delete _spec;
- 
-  Int_t n_generated_entries = (Int_t)(data->sumEntries());
 
-  //delete _data;
+  //data->plotOn(xframe);
+  //TCanvas* c = new TCanvas("test","rf101_basics",800,400) ;
+  //gPad->SetLeftMargin(0.15) ; xframe->GetYaxis()->SetTitleOffset(1.6) ; xframe->Draw() ;
+  //c->SaveAs("test.pdf");
+
+  Int_t n_generated_entries = (Int_t)(data->sumEntries());
 
   // debug
   std::cout << "!!!!!!!!!!!!!! _beta = " << _beta << std::endl;
@@ -772,7 +780,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << std::endl;
       // prepare PE data
       CreateDimuonToyMc();
-      if (!pe_counter) data=SetObservableRange(peak);
+      //if (!pe_counter) data=SetObservableRange(peak);
     }
     else { //  "regular" observed limit
       
@@ -780,7 +788,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << "calculating an observed limit..." << std::endl;
       std::cout << _legend << "I will do it " << ntoys << " times, so one can average. " << pe_counter+1 << " of " << ntoys << std::endl;
       std::cout << _legend << std::endl;
-      if (!pe_counter) data=SetObservableRange(peak);
+      //if (!pe_counter) data=SetObservableRange(peak);
       //ntoys = 1;
     }
 
