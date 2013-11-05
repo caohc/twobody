@@ -1173,8 +1173,7 @@ class PlotGraphs:
                           xmin = 350, xmax = 3500,
                           precision = 0.000000001):
         legend = 'PlotGraphs::find_intersection(%s,%s):'%(cat1,cat2)
-
-	#always put "exp" or "obs" in cat1 
+ 	#always put "exp" or "obs" in cat1 
 	if cat1 is "exp" or cat1 is "obs":
 	    if cat1 in self.data.cat:
             	graph1 = self.multigraph.GetListOfGraphs().At(self.graph_index[cat1])
@@ -1184,7 +1183,6 @@ class PlotGraphs:
 	else:
 	    print cat1, " is not obs/exp limit."
             return ["None"]
-        
         if cat2 in self.data.cat:
             graph2 = self.multigraph.GetListOfGraphs().At(self.graph_index[cat2])
             #graph2.Print()
@@ -1224,9 +1222,21 @@ class PlotGraphs:
                 _sign1 = not(_sign1)
                 result.append(_crosspt)
         if result:
-            print_limits(result)
+            print "Allowed region:",
+            _x=0
+            while _x < len(result):
+                if _x+1 < len(result):
+                    print "[",result[_x],",",result[_x+1],"];",
+                else:
+                    if _x+1 == len(result):
+                        print "[",result[_x],", inf ];"
+                if _x+2 == len(result):
+                    print
+                _x+=2
         else:
             print "[",xmin,"~",xmax,"] is excluded."
+        del graph1
+        del graph2
         return result
 
 def cmsPrel(intLumi = None,
@@ -1284,22 +1294,7 @@ def legend(legend):
     #latex.SetTextAlign(31) # align right
     latex.SetTextAlign(5) # align left
     latex.DrawLatex(0.5, 0.05, legend)
-
-
-def print_limits(result):
-    print "Allowed region:",
-    
-    _x=0
-    while _x < len(result):
-        if _x+1 < len(result):
-            print "[",result[_x],",",result[_x+1],"];",
-        else:
-            if _x+1 == len(result):
-                print "[",result[_x],", inf ];"
-            else:
-                print
-        _x+=2
-            
+      
 def makeMultiGraph(ds, filename,
                    xlow, xhigh, ylow, yhigh,
                    xlabel = "", ylabel = "",
@@ -1350,25 +1345,26 @@ def makeMultiGraph(ds, filename,
 
     if find_intersection:
         _name='exp'
+        _limits=[]
 #        _xssm   = pMass.find_intersection('obs', 'SSM')
 #        _xpsi   = pMass.find_intersection('obs', 'Psi')
 #        _xrs01  = pMass.find_intersection('obs', 'RS0.1')
 #        _xrs005 = pMass.find_intersection('obs', 'RS0.05')
-        _stu06 = pMass.find_intersection(_name, 'Stu06')
-        _stu05 = pMass.find_intersection(_name, 'Stu05')
-        _stu04 = pMass.find_intersection(_name, 'Stu04')
-        _stu03 = pMass.find_intersection(_name, 'Stu03')
-        _stu02 = pMass.find_intersection(_name, 'Stu02')
+        _limits.append( pMass.find_intersection(_name, 'Stu06') )
+        _limits.append( pMass.find_intersection(_name, 'Stu05') )
+        _limits.append( pMass.find_intersection(_name, 'Stu04') )
+        _limits.append( pMass.find_intersection(_name, 'Stu03') )
+        _limits.append( pMass.find_intersection(_name, 'Stu02') )
 #        print _legend, filename, 'SSM:', _xssm
 #        print _legend, filename, 'Psi:', _xpsi
 #        print _legend, filename, 'RS 0.1:', _xrs01
 #        print _legend, filename, 'RS 0.05:', _xrs005
 
-    if draw_limit_line:
-        pMass.draw_line(_xssm)
-        pMass.draw_line(_xpsi)
-        pMass.draw_line(_xrs01)
-        pMass.draw_line(_xrs005)
+#    if draw_limit_line:
+        #pMass.draw_line(_limits[0][-1])
+        #pMass.draw_line(_xpsi)
+        #pMass.draw_line(_xrs01)
+        #pMass.draw_line(_xrs005)
 
     if print_values:
         pMass.print_values(_name, 'obs2')
@@ -1395,9 +1391,7 @@ def makeMultiGraph(ds, filename,
     _h.Draw("axis same")
 
     c.SaveAs(filename)
-
- 
-    #return c
+    return [c,pMass]
 
 
 
