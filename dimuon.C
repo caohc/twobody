@@ -628,7 +628,6 @@ Int_t TwoBody::CreateDimuonToyMc( void ){
   Double_t _ntoy = _beta * _nbkg_est;
  
   Int_t _n = r.Poisson(_ntoy);
-  _n=Int_t(_nbkg_est);
   // all nuisance parameters:
   //   beta_nsig_dimuon, 
   //   beta_nbkg_dimuon,
