@@ -9,9 +9,6 @@ source setup/cmssw_setup.[c]sh
 cd workdir
 git clone git@github.com:zhang8473/twobody.git
 cd twobody
-<comment>
-PWDTMP=${PWD//\//\\\/};sed -i "s/,.*dimuon_20637invpb.root/, 'Dimuon data', ${PWDTMP}\/dimuon_20637invpb.root/g" dimuon_ratio.cfg
-</comment>
 exost -a workspace -c dimuon_ratio.cfg 
 cp myWS.root ws_dimuon_ratio.cfg
 root rootlogon.C
