@@ -46,16 +46,6 @@ using namespace RooFit;
 using namespace RooStats;
 using namespace std;
 
-Double_t limit( std::string channel,           // dimuon, dielectron...
-		std::string mode,              // obsereved, expected, mass limit (extra k-factor uncertainty)
-		Float_t peak,
-		std::string suffix = "",       // suffix for output file names
-		Int_t ntoys = 1,               // number of pseudoexperiments for expected limit
-		Int_t mcmc_iter = 100000,      // number of MCMC iterations
-		Int_t mcmc_burnin = 100,       // number of MCMC burn in steps to be discarded
-		std::string inputdir = "",     // directory with workspace files
-		std::string plot_name = "" );
-
 class TwoBody{
   //
   // The class combines multiple channel analyses. A workspace is created
@@ -74,7 +64,8 @@ public:
 			 Int_t mcmc_iter = 100000, // number of MCMC iterations
 			 Int_t mcmc_burnin = 100,  // number of MCMC burn in steps to be discarded
 			 std::string inputdir = "",// directory with workspace files
-			 std::string plot_name = "" );
+			 Double_t masswindow_width=-1.,
+			 UInt_t minEvents=1000000 );
   
   Int_t AddWorkspace(std::string filename,
 		     std::string ws_name,
@@ -103,7 +94,7 @@ private:
   Double_t GetPoiUpperSimple(std::string channel, Double_t peak);
   Double_t GetPoiUpper(std::string channel, Double_t peak, ModelConfig &_mc);
   std::map<std::string, double> GetDataRange( RooAbsData * _data, double peak, int goal, Double_t window_width=0.2 );
-  RooAbsData * SetObservableRange( double peak, Double_t window_width=0.2, Int_t minEvents=600 );
+  RooAbsData * SetObservableRange( double peak, Double_t window_width=0.2, UInt_t minEvents=600 );
   std::ofstream logfile;
   RooAbsData * data, * realdata;
   RooAbsPdf * model;
@@ -268,7 +259,7 @@ TwoBody::GetDataRange( RooAbsData * _data,
   return _mres;
 }
 
-RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, Int_t minEvents ){
+RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, UInt_t minEvents ){
   //
   // Reduce the observable range so ~400 events are used
   // for the full combined dataset
@@ -789,7 +780,8 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
 				Int_t mcmc_iter,
 				Int_t mcmc_burnin,
 				std::string inputdir,  // directory with workspace files
-				std::string plot_name ){
+				Double_t masswindow_width,
+				UInt_t minEvents ){
   //
   // limit on ratio = xsec(Z')/xsec(Z) in dimuon channel
   //
@@ -812,7 +804,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << std::endl;
       // prepare PE data
       CreateDimuonToyMc();
-      //if (!pe_counter) data=SetObservableRange(peak);
+      //if (!pe_counter&&masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
     }
     else { //  "regular" observed limit
       
@@ -820,7 +812,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << "calculating an observed limit..." << std::endl;
       std::cout << _legend << "I will do it " << ntoys << " times, so one can average. " << pe_counter+1 << " of " << ntoys << std::endl;
       std::cout << _legend << std::endl;
-      //if (!pe_counter) data=SetObservableRange(peak);
+      if (!pe_counter&&masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
       //ntoys = 1;
     }
 
@@ -855,7 +847,8 @@ Double_t limit( std::string channel, // dimuon, dielectron, mumuee, etc
 		Int_t mcmc_iter,     // number of MCMC iterations
 		Int_t mcmc_burnin,   // number of MCMC burn in steps to be discarded
 		std::string inputdir,// directory with workspace files
-		std::string plot_name ){
+		Double_t masswindow_width,
+		UInt_t minEvents ){
 
   // time it
   TStopwatch t;
@@ -871,7 +864,7 @@ Double_t limit( std::string channel, // dimuon, dielectron, mumuee, etc
   if (channel.find("dimuon") != std::string::npos ){
     manager.DimuonRatioLimit(peak, mode, suffix,
 			     ntoys, mcmc_iter, mcmc_burnin,
-			     inputdir, plot_name);
+			     inputdir,masswindow_width,minEvents);
   }
 
   t.Print();
