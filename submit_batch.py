@@ -35,12 +35,12 @@ mode = 'expected'
 #mode = 'mass_cteq'
 #mode = 'mass_graviton'
 
-mass_min  =    500.0
-mass_max  =    500.1
+mass_min  =    225.0
+mass_max  =    3500.1
 mass_inc  =     25.0
 n_iter    =    10000
 n_burn_in =      500
-masswindow_width = 0.1
+masswindow_width = -1.
 minEvents = 600
 
 exp_ntoys_per_job = 100           # these params are now used for observed as well
