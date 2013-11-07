@@ -88,6 +88,12 @@ public:
 				 int n_burn,
 				 double left_side_tail_fraction,
 				 int n_bins);
+  MCMCInterval * GetMcmcInterval_OldWay(ModelConfig mc,
+				 double conf_level,
+				 int n_iter,
+				 int n_burn,
+				 double left_side_tail_fraction,
+				 int n_bins);
   LikelihoodInterval * GetPlrInterval( double conf_level, ModelConfig &_mc );
 
 private:
@@ -96,8 +102,8 @@ private:
   Int_t FixVariables( std::set<std::string> par );
   Double_t GetPoiUpperSimple(std::string channel, Double_t peak);
   Double_t GetPoiUpper(std::string channel, Double_t peak, ModelConfig &_mc);
-  std::map<std::string, double> GetDataRange( RooAbsData * _data, double peak, int goal );
-  RooAbsData * SetObservableRange( double peak );
+  std::map<std::string, double> GetDataRange( RooAbsData * _data, double peak, int goal, Double_t window_width=0.2 );
+  RooAbsData * SetObservableRange( double peak, Double_t window_width=0.2, Int_t minEvents=600 );
   std::ofstream logfile;
   RooAbsData * data, * realdata;
   RooAbsPdf * model;
@@ -161,7 +167,7 @@ double TwoBody::printMcmcUpperLimit( double peak, ModelConfig &_mc, std::string 
 std::map<std::string, double>
 TwoBody::GetDataRange( RooAbsData * _data, 
 		       double peak,
-		       int goal ){
+		       int goal, Double_t window_width ){
   //
   // Estimate the reduced observable range so either
   //  - ~goal events are used or
@@ -172,8 +178,8 @@ TwoBody::GetDataRange( RooAbsData * _data,
   std::string legend = "[TwoBody::GetDataRange]: ";
 
   int iGoal       = goal; // we want that many events in the range
-  double sig_low  = peak*0.8;  // signal box that must be in the range
-  double sig_high = peak*1.2; // signal box that must be in the range
+  double sig_low  = peak*(1-window_width);  // signal box that must be in the range
+  double sig_high = peak*(1+window_width); // signal box that must be in the range
 
   double _total = _data->sumEntries();
 
@@ -262,7 +268,7 @@ TwoBody::GetDataRange( RooAbsData * _data,
   return _mres;
 }
 
-RooAbsData * TwoBody::SetObservableRange( double peak ){
+RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, Int_t minEvents ){
   //
   // Reduce the observable range so ~400 events are used
   // for the full combined dataset
@@ -275,7 +281,7 @@ RooAbsData * TwoBody::SetObservableRange( double peak ){
   std::map<std::string, double> _range;
 
   iTotal = (int)data->sumEntries();
-  _range = GetDataRange( data, peak, 600 );
+  _range = GetDataRange( data, peak, minEvents, window_width );
   char buf[256];
 
   // FIXME: hardcoded POI name throughout
@@ -593,9 +599,9 @@ Int_t TwoBody::AddWorkspace(std::string filename,
   data = new RooDataSet( *(RooDataSet *) _ws->data("data") );
   data->changeObservableName("vertex_m","mass");
 
-  realdata = new RooDataSet( *(RooDataSet *) data );
+  //realdata = new RooDataSet( *(RooDataSet *) data );
   //new RooDataSet( *(RooDataSet *) ws->data("data") );
-  realdata->SetName("RealData");
+  //realdata->SetName("RealData");
   //realdata->changeObservableName("vertex_m","mass");
 
   ws->import( *data );
@@ -682,16 +688,6 @@ MCMCInterval * TwoBody::GetMcmcInterval(ModelConfig _mc,
 
   std::string legend = "[TwoBody::GetMcmcInterval]: ";
 
-  /*
-  RooFitResult* fit = ws->pdf("model")->fitTo(*data,Save());
-  ProposalHelper ph;
-  ph.SetVariables((RooArgSet&)fit->floatParsFinal());
-  ph.SetCovMatrix(fit->covarianceMatrix());
-  ph.SetUpdateProposalParameters(kTRUE); // auto-create mean vars and add mappings
-  ph.SetCacheSize(100);
-  ProposalFunction* pf = ph.GetProposalFunction();
-  */
-
   // FIXME: testing: this proposal function seems fairly robust
   SequentialProposal sp(0.5);
 
@@ -699,8 +695,6 @@ MCMCInterval * TwoBody::GetMcmcInterval(ModelConfig _mc,
   mcmc.SetConfidenceLevel(conf_level);
   mcmc.SetNumIters(n_iter);          // Metropolis-Hastings algorithm iterations
 
-  // FIXME: testing: different proposal function
-  //mcmc.SetProposalFunction(*pf);
   mcmc.SetProposalFunction(sp);
 
   mcmc.SetNumBurnInSteps(n_burn); // first N steps to be ignored as burn-in
@@ -745,6 +739,45 @@ MCMCInterval * TwoBody::GetMcmcInterval(ModelConfig _mc,
     }
   }
   else std::cout << "No interval found!" << std::endl;
+  
+  return mcInt;
+}
+
+MCMCInterval * TwoBody::GetMcmcInterval_OldWay(ModelConfig mc,
+					double conf_level,
+					int n_iter,
+					int n_burn,
+					double left_side_tail_fraction,
+					int n_bins){
+  // use MCMCCalculator  (takes about 1 min)
+  // Want an efficient proposal function, so derive it from covariance
+  // matrix of fit
+  
+  RooFitResult* fit = ws->pdf("model")->fitTo(*data,Save());
+  ProposalHelper ph;
+  ph.SetVariables((RooArgSet&)fit->floatParsFinal());
+  ph.SetCovMatrix(fit->covarianceMatrix());
+  ph.SetUpdateProposalParameters(kTRUE); // auto-create mean vars and add mappings
+  ph.SetCacheSize(100);
+  ProposalFunction* pf = ph.GetProposalFunction();
+  
+  MCMCCalculator mcmc( *data, mc );
+  mcmc.SetConfidenceLevel(conf_level);
+  mcmc.SetNumIters(n_iter);          // Metropolis-Hastings algorithm iterations
+  mcmc.SetProposalFunction(*pf);
+  mcmc.SetNumBurnInSteps(n_burn); // first N steps to be ignored as burn-in
+  mcmc.SetLeftSideTailFraction(left_side_tail_fraction);
+  mcmc.SetNumBins(n_bins);
+  
+//mcInt = mcmc.GetInterval();
+  try {
+    mcInt = mcmc.GetInterval();
+  } catch ( std::length_error &ex) {
+    mcInt = 0;
+  }
+
+  //std::cout << "!!!!!!!!!!!!!! interval" << std::endl;
+  if (mcInt == 0) std::cout << "No interval found!" << std::endl;
   
   return mcInt;
 }
