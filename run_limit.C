@@ -6,7 +6,8 @@ void run_limit( std::string channel, // dimuon, dielectron etc
 		Int_t mcmc_iter,     // number of MCMC iterations
 		Int_t mcmc_burnin,   // number of MCMyC burn in steps to be discarded
 		std::string inputdir,
-		std::string plot_name )
+		Double_t masswindow_width,
+	        Int_t minEvents )
 {
   //gSystem->SetIncludePath( "-Itardir/");
   gSystem -> SetIncludePath( "-I$ROOT_INCLUDE -I$ROOFIT_INCLUDE");
@@ -19,6 +20,7 @@ void run_limit( std::string channel, // dimuon, dielectron etc
 	 mcmc_iter,   // number of MCMC iterations
 	 mcmc_burnin, // number of MCMC burn in steps to be discarded
 	 inputdir,
-	 plot_name );
+ 	 masswindow_width,
+         minEvents );
   return;
 }

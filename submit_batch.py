@@ -35,14 +35,16 @@ mode = 'observed'
 #mode = 'mass_cteq'
 #mode = 'mass_graviton'
 
-mass_min  =    250.0
-mass_max  =    1500.1
+mass_min  =    500.0
+mass_max  =    500.1
 mass_inc  =     25.0
 n_iter    =    10000
 n_burn_in =      500
+masswindow_width = -1.
+minEvents = 600
 
-exp_ntoys_per_job = 100           # these params are now used for observed as well
-exp_ntoys_per_mass_point = 2000
+exp_ntoys_per_job = 5           # these params are now used for observed as well
+exp_ntoys_per_mass_point = 20
 
 #
 #------------------------------------------------------------------------
@@ -53,7 +55,7 @@ legend = '[submit_condor]:'
 os.system("exost -a workspace -c dimuon_ratio.cfg")
 os.system('mv myWS.root ws_dimuon_ratio.root')
 os.system('ls -lh ws_dimuon_ratio.root;date')
-print "=========ws_dimuon_ratio.root should be updated====="
+print "=========ws_dimuon_ratio.root was updated====="
 os.system('root -l -b -q -n rootlogon.C dimuon.C++')
 _dir=os.getcwd()
 
@@ -85,7 +87,8 @@ while _peak < mass_max:
             str(n_iter)+',' + \
             str(n_burn_in)+',' + \
             '\\"\\",' + \
-            '\\"\\"' + \
+            str(masswindow_width) + ',' + \
+            str(minEvents) + \
             '\\)\n'+\
             'rm ../'+SHNAME+'\n'+\
             'cp *.ascii ../;cd ..\n'+\
