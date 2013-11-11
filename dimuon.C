@@ -804,7 +804,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << std::endl;
       // prepare PE data
       CreateDimuonToyMc();
-      //if (!pe_counter&&masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
+      if (!pe_counter&&masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
     }
     else { //  "regular" observed limit
       
