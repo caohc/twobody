@@ -224,11 +224,13 @@ TwoBody::GetDataRange( RooAbsData * _data,
     if ( dLow < dHigh || iHigh <= iSigHigh ){
       iSigLow = iLow;
       sig_high += sig_low - v_data[iSigLow];
+      if (sig_high>v_data[iTotal-1]) sig_high=v_data[iTotal-1];
       sig_low = v_data[iSigLow];
     }
     else{
       iSigHigh = iHigh;
       sig_low -= v_data[iSigHigh] - sig_high;
+      if (sig_low<0) sig_low=0;
       sig_high = v_data[iSigHigh];
     }
     ++iSignal;
@@ -422,8 +424,9 @@ LikelihoodInterval *TwoBody::GetPlrInterval( double conf_level , ModelConfig &_m
   // Profile likelihood ratio interval calculations
   //
 
-  cerr<<"Print ModelConfig: "<<endl;
-  _mc.Print();
+  //  cerr<<"Print ModelConfig: "<<endl;
+  //_mc.Print();
+  //data->Print();
 
   ProfileLikelihoodCalculator plc(*data, _mc);
   plc.SetConfidenceLevel(conf_level);
