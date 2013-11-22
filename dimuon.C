@@ -168,10 +168,6 @@ TwoBody::GetDataRange( RooAbsData * _data,
 
   std::string legend = "[TwoBody::GetDataRange]: ";
 
-  int iGoal       = goal; // we want that many events in the range
-  double sig_low  = peak*(1-window_width);  // signal box that must be in the range
-  double sig_high = peak*(1+window_width); // signal box that must be in the range
-
   double _total = _data->sumEntries();
 
   // get data in a vector
@@ -182,10 +178,14 @@ TwoBody::GetDataRange( RooAbsData * _data,
   }
 
   int iTotal = v_data.size();
-  std::cout << legend << "data vector size: " << iTotal << "; want [" <<sig_low<<","<<sig_high<<"]"<<std::endl;
 
   // sort data vector
   std::sort(v_data.begin(), v_data.end());
+
+  int iGoal       = goal; // we want that many events in the range
+  double sig_low  = max(peak*(1-window_width),v_data[0]);  // signal box that must be in the range
+  double sig_high = min(peak*(1+window_width),v_data[iTotal-1]); // signal box that must be in the range
+  std::cout << legend << "data vector size: " << iTotal << "; want [" <<sig_low<<","<<sig_high<<"]"<<std::endl;
 
   // find highest point in the signal box
   int iPeak = iTotal;
@@ -230,7 +230,7 @@ TwoBody::GetDataRange( RooAbsData * _data,
     else{
       iSigHigh = iHigh;
       sig_low -= v_data[iSigHigh] - sig_high;
-      if (sig_low<0) sig_low=0;
+      if (sig_low<0) sig_low=v_data[0];
       sig_high = v_data[iSigHigh];
     }
     ++iSignal;
