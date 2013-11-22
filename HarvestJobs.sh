@@ -1,6 +1,6 @@
 #!/bin/bash
-#mode=expected
-mode=observed
+mode=expected
+#mode=observed
 for i in `seq 200 25 3500`
 do
   if ls dimuon_ratio_mcmc_limit_m${i}.[0-9]*_${mode}*.ascii &> /dev/null; then
