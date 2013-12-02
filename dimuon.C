@@ -277,11 +277,9 @@ RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, UI
   _range = GetDataRange( data, peak, minEvents, window_width );
   char buf[256];
 
-  // FIXME: hardcoded POI name throughout
-
-  // change the range
-  ws->var("mass")->setRange(_range["low"], _range["high"]);
-  ws->var("mass")->Print();
+  // Should not change the range!
+  //ws->var("mass")->setRange(_range["low"], _range["high"]);
+  //ws->var("mass")->Print();
 
   // replace data
   sprintf(buf, "mass>%f && mass<%f", _range["low"], _range["high"]);
@@ -807,7 +805,7 @@ void TwoBody::DimuonRatioLimit( Float_t peak,
       std::cout << _legend << std::endl;
       // prepare PE data
       CreateDimuonToyMc();
-      if (!pe_counter&&masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
+      if (masswindow_width>0) data=SetObservableRange(peak,masswindow_width,minEvents);
     }
     else { //  "regular" observed limit
       
