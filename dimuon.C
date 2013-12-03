@@ -269,11 +269,8 @@ RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, UI
 
   std::string legend = "[TwoBody::SetObservableRange]: ";
 
-  int iTotal;
-
   std::map<std::string, double> _range;
 
-  iTotal = (int)data->sumEntries();
   _range = GetDataRange( data, peak, minEvents, window_width );
   char buf[256];
 
@@ -282,6 +279,7 @@ RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, UI
   //ws->var("mass")->Print();
 
   // replace data
+  //int iTotal = (int)data->sumEntries();
   sprintf(buf, "mass>%f && mass<%f", _range["low"], _range["high"]);
   RooAbsData * _data = data->reduce( RooFit::Cut(buf) );
   // correct the nbkg constraint accordingly
