@@ -285,9 +285,9 @@ RooAbsData * TwoBody::SetObservableRange( double peak, Double_t window_width, UI
   sprintf(buf, "mass>%f && mass<%f", _range["low"], _range["high"]);
   RooAbsData * _data = data->reduce( RooFit::Cut(buf) );
   // correct the nbkg constraint accordingly
-  double _nbkg = ws->var("nbkg_est_dimuon")->getVal();
-  ws->var("nbkg_est_dimuon")->setVal(_nbkg*_data->sumEntries()/(double)(iTotal));
-  ws->var("nbkg_est_dimuon")->Print();
+  //double _nbkg = ws->var("nbkg_est_dimuon")->getVal();
+  //ws->var("nbkg_est_dimuon")->setVal(_nbkg*_data->sumEntries()/(double)(iTotal));
+  //ws->var("nbkg_est_dimuon")->Print();
 
   data->Print();
   _data->Print();
