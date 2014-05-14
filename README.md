@@ -10,7 +10,7 @@ cd workdir
 git clone git@github.com:zhang8473/twobody.git
 cd twobody
 exost -a workspace -c dimuon_ratio.cfg 
-cp myWS.root ws_dimuon_ratio.cfg
+cp myWS.root ws_dimuon_ratio.root
 root rootlogon.C
 </pre>
 
